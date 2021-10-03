@@ -122,6 +122,15 @@ commit info是指提交信息
 
 xieyuning20/Android是我的仓库地址
 
+若出现下图提示
+
+[![4LLF91.png](https://z3.ax1x.com/2021/10/03/4LLF91.png)](https://imgtu.com/i/4LLF91)
+
+说明远程仓库origin已经存在，遇到这种情况可以先把这个仓库移除再重新添加。
+
+在Git Bash里敲入`git remote rm origin`
+再敲入` git remote add origin git@github.com:xieyuning20/Android.git`即可
+
 `git push origin master`
 
 上传成功截图：
