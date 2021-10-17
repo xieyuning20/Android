@@ -271,4 +271,244 @@ public class MainActivity extends AppCompatActivity {
 
 ### 四、创建上下文操作模式（ActionMode）的上下文菜单
 
-**注意：ListView控件中必须设置属性android:choiceMode="multipleChoiceModal"**
+先使用ListView创建List，再为ListItem创建ActionMode形式的上下文菜单，设置响应即刻实现
+
+这题的布局文件与第一题差不多但是要注意：**activity_main.xml的ListView控件中必须设置属性android:choiceMode="multipleChoiceModal，也就是可以为多选"**
+
+上方选项菜单的有关设置menu.xml的代码如下：
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_delete"
+        app:showAsAction="always"
+        android:icon="@drawable/dustbin"
+        android:title="@string/delete" />
+</menu>
+```
+
+为了实现显示选中数量的功能，新建一个Item类来给list新增一个是否被选中的属性
+
+```
+public class Item {
+
+    private String name;//显示的选项名
+    private boolean bo;//记录是否被选中
+
+    //构造函数
+    public Item(){
+        super();
+    }
+
+    //带两个参数的构造函数
+    public Item(String name, boolean bo){
+        super();
+        this.name = name;
+        this.bo = bo;
+    }
+
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean isBo() {
+        return bo;
+    }
+    public void setBo(boolean bo) {
+        this.bo = bo;
+    }
+}
+```
+
+这里采用了BaseAdapter的适配器
+
+```
+public class Adapter extends BaseAdapter {
+
+    List<Item> list;//item的list对象
+    Context context;//上下文对象
+
+    //初始化
+    public Adapter(List<Item> list, Context context) {
+        this.context = context;
+        this.list = list;
+        //列表同步方法
+        notifyDataSetChanged();
+    }
+
+    //得到当前列表的选项数量
+    public int getCount() {
+        return list.size();
+    }
+
+    //根据下标得到列表项
+    public Item getItem(int position) {
+        return list.get(position);
+    }
+
+    public long getItemId(int position) {
+        return 0;
+    }
+
+    public View getView(final int position, View convertView, ViewGroup parent) {
+
+        final ViewHolder viewHolder;
+        //如果还没加载
+        if(convertView==null){
+            //加载布局文件，并将各个选项以及每个选项中的内容一一对应
+            convertView=View.inflate(context, R.layout.simple_item, null);
+            viewHolder=new ViewHolder();
+            viewHolder.imageView=(ImageView) convertView.findViewById(R.id.picture);
+            viewHolder.textView=(TextView) convertView.findViewById(R.id.item);
+            convertView.setTag(viewHolder);
+        }else{
+            viewHolder=(ViewHolder) convertView.getTag();
+        }
+
+        //得到十六进制的颜色的int值
+        int blue = Color.parseColor("#33B5E5");
+        int white = Color.parseColor("#FFFFFF");
+        viewHolder.textView.setText(list.get(position).getName());
+        //如果被选中，那么改变选中颜色
+        if(list.get(position).isBo() == true){
+            viewHolder.textView.setBackgroundColor(blue);
+            viewHolder.imageView.setBackgroundColor(blue);
+        }
+        else {
+            viewHolder.textView.setBackgroundColor(white);
+            viewHolder.imageView.setBackgroundColor(white);
+        }
+        return convertView;
+
+    }
+
+    //创建内部类，定义每一个列表项所包含的东西，这里是每个列表项都有一个imageView和textView。
+    class ViewHolder{
+        ImageView imageView;
+        TextView textView;
+    }
+}
+```
+
+在MainActivity.java中，采用onItemCheckedStateChanged()方法以及ActionMode.Callback接口中的各类方法实现要求的功能：
+
+```
+public class MainActivity extends AppCompatActivity {
+
+    private ListView listView;
+    private List<Item> list;
+
+    private BaseAdapter adapter;
+    private String [] name = {"One","Two","Three","Four","Five"};
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        listView = findViewById(R.id.mylist);
+        list = new ArrayList<Item>();
+        //定义item并且加入list中
+        for(int i = 0; i < name.length; i++){
+            list.add(new Item(name[i], false));
+        }
+        //对listview进行适配器适配
+        adapter = new Adapter(list, MainActivity.this);
+        listView.setAdapter(adapter);
+
+        //设置listview允许多选模式
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        listView.setMultiChoiceModeListener(new MultiChoiceModeListener() {
+            //选中数量
+            int num = 0;
+            /*
+             * 参数：ActionMode是长按后出现的标题栏
+             *        positon是当前选中的item的序号
+             *    id 是当前选中的item的id
+             *    checked 如果是选中事件则为true，如果是取消事件则为false
+             */
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                // 调整选定条目
+                if (checked == true) {
+                    list.get(position).setBo(true);
+                    //实时刷新
+                    adapter.notifyDataSetChanged();
+                    num++;
+                } else {
+                    list.get(position).setBo(false);
+                    //实时刷新
+                    adapter.notifyDataSetChanged();
+                    num--;
+                }
+                // 用TextView显示
+                mode.setTitle("  " + num + " Selected");
+            }
+
+            /*
+             * 参数：ActionMode是长按后出现的标题栏
+             *        Menu是标题栏的菜单内容
+             */
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                // 设置长按后所要显示的标题栏的内容
+                MenuInflater inflater = mode.getMenuInflater();
+                inflater.inflate(R.menu.menu, menu);
+                num = 0;
+                adapter.notifyDataSetChanged();
+                return true;
+            }
+            /*
+             * 可在此方法中进行标题栏UI的创建和更新
+             */
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+
+                adapter.notifyDataSetChanged();
+                return false;
+            }
+            public void refresh(){
+                for(int i = 0; i < name.length; i++){
+                    list.get(i).setBo(false);
+                }
+            }
+            /*
+             * 可在此方法中监听标题栏Menu的监听，从而进行相应操作
+             * 设置actionMode菜单每个按钮的点击事件
+             * 这里我只设置了删除
+             */
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    //删除
+                    case R.id.menu_delete:
+                        adapter.notifyDataSetChanged();
+                        num = 0;
+                        refresh();
+                        mode.finish();// 由于题目的要求主要是上下文菜单关联模式的实现，没有继续扩展相应的方法，将菜单按钮设置为返回，结束多选模式
+                        return true;
+                    default:
+                        refresh();
+                        adapter.notifyDataSetChanged();
+                        num = 0;
+                        return false;
+                }
+            }
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                refresh();
+                adapter.notifyDataSetChanged();
+            }
+        });
+    }
+}
+```
+
+实验截图：
+
+[![5tMmEq.png](https://z3.ax1x.com/2021/10/17/5tMmEq.png)](https://imgtu.com/i/5tMmEq)

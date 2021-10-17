@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                         adapter.notifyDataSetChanged();
                         num = 0;
                         refresh();
-                        mode.finish();// 没有继续扩展相应的方法，每个菜单按钮都设置返回，结束多选模式
+                        mode.finish();// 由于题目的要求主要是上下文菜单关联模式的实现，没有继续扩展相应的方法，将菜单按钮设置为返回，结束多选模式
                         return true;
                     default:
                         refresh();
