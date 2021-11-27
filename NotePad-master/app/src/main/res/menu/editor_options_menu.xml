@@ -8,8 +8,45 @@
     <item android:id="@+id/menu_revert"
           android:icon="@drawable/ic_menu_revert"
           android:title="@string/menu_revert" />
+    <item android:id="@+id/menu_export"
+        android:title="@string/menu_export" />
     <item android:id="@+id/menu_delete"
           android:icon="@drawable/ic_menu_delete"
           android:title="@string/menu_delete"
           android:showAsAction="ifRoom|withText" />
+    <item
+        android:id="@+id/font_size"
+        android:title="@string/font_size">
+        <menu>
+            <group>
+                <item
+                    android:id="@+id/font_s"
+                    android:title="@string/font_s"
+                    />
+
+                <item
+                    android:id="@+id/font_m"
+                    android:title="@string/font_m" />
+                <item
+                    android:id="@+id/font_l"
+                    android:title="@string/font_l" />
+            </group>
+        </menu>
+    </item>
+
+    <item
+        android:title="@string/font_color"
+        android:id="@+id/font_color"
+        >
+        <menu>
+            <group>
+                <item
+                    android:id="@+id/red_font"
+                    android:title="@string/font_red" />
+                <item
+                    android:title="@string/font_black"
+                    android:id="@+id/black_font"/>
+            </group>
+        </menu>
+    </item>
 </menu>

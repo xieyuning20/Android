@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.icu.text.SimpleDateFormat;
@@ -40,7 +41,10 @@ import android.view.MenuItem;
 import android.widget.EditText;
 
 import java.sql.Date;
+import android.annotation.SuppressLint;
+import android.widget.TextView;
 
+@SuppressLint("AppCompatCustomView")
 
 /**
  * 编辑笔记内容的activity
@@ -65,7 +69,9 @@ public class NoteEditor extends Activity {
         new String[] {
             NotePad.Notes._ID,
             NotePad.Notes.COLUMN_NAME_TITLE,
-            NotePad.Notes.COLUMN_NAME_NOTE
+            NotePad.Notes.COLUMN_NAME_NOTE,
+            NotePad.Notes.COLUMN_NAME_TEXT_SIZE,
+            NotePad.Notes.COLUMN_NAME_TEXT_COLOR
     };
 
     // A label for the saved state of the activity
@@ -372,9 +378,11 @@ public class NoteEditor extends Activity {
                  */
             } else if (mState == STATE_EDIT) {
                 // Creates a map to contain the new values for the columns
-                updateNote(text, null);
+                TextView textView=findViewById(R.id.note);
+                updateNote(text, null,textView.getCurrentTextColor(),(int)textView.getTextSize());
             } else if (mState == STATE_INSERT) {
-                updateNote(text, text);
+                TextView textView=findViewById(R.id.note);
+                updateNote(text, text,textView.getCurrentTextColor(),(int)textView.getTextSize());
                 mState = STATE_EDIT;
           }
         }
@@ -441,7 +449,8 @@ public class NoteEditor extends Activity {
         switch (item.getItemId()) {
         case R.id.menu_save:
             String text = mText.getText().toString();
-            updateNote(text, null);
+            TextView textView=findViewById(R.id.note);
+            updateNote(text, null,textView.getCurrentTextColor(),(int)textView.getTextSize());
             finish();
             break;
         case R.id.menu_delete:
@@ -450,6 +459,26 @@ public class NoteEditor extends Activity {
             break;
         case R.id.menu_revert:
             cancelNote();
+            break;
+        case R.id.menu_export:
+            Intent intent = new Intent(this, NoteExport.class);
+            this.startActivity(intent);
+            break;
+
+        case R.id.font_s:
+            mText.setTextSize(20);
+            break;
+        case R.id.font_m:
+            mText.setTextSize(32);
+            break;
+        case R.id.font_l:
+            mText.setTextSize(40);
+            break;
+        case R.id.black_font:
+            mText.setTextColor(Color.BLACK);
+            break;
+        case R.id.red_font:
+            mText.setTextColor(Color.RED);
             break;
         }
         return super.onOptionsItemSelected(item);
@@ -517,7 +546,8 @@ public class NoteEditor extends Activity {
             }
 
             // Updates the current note with the retrieved title and text.
-            updateNote(text, title);
+            TextView textView=findViewById(R.id.note);
+            updateNote(text, title,textView.getCurrentTextColor(),(int)textView.getTextSize());
         }
     }
 //END_INCLUDE(paste)
@@ -527,7 +557,7 @@ public class NoteEditor extends Activity {
      * @param text The new note contents to use.
      * @param title The new note title to use
      */
-    private final void updateNote(String text, String title) {
+    private final void updateNote(String text, String title,int size,int color) {
 
         // Sets up a map to contain values to be updated in the provider.
         ContentValues values = new ContentValues();
@@ -538,6 +568,8 @@ public class NoteEditor extends Activity {
         Date d = new Date(now);
         String format = sf.format(d);
         values.put(NotePad.Notes.COLUMN_NAME_MODIFICATION_DATE, format);
+
+
 
 
 
@@ -572,7 +604,8 @@ public class NoteEditor extends Activity {
 
         // This puts the desired notes text into the map.
         values.put(NotePad.Notes.COLUMN_NAME_NOTE, text);
-
+        values.put(NotePad.Notes.COLUMN_NAME_TEXT_SIZE, size);
+        values.put(NotePad.Notes.COLUMN_NAME_TEXT_COLOR, color);
         /*
          * Updates the provider with the new values in the map. The ListView is updated
          * automatically. The provider sets this up by setting the notification URI for

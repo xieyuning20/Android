@@ -54,6 +54,7 @@ public class NoteSearch extends ListActivity implements SearchView.OnQueryTextLi
                 viewIDs
         );
         setListAdapter(adapter);
+        
         return true;
     }
     @Override

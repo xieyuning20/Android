@@ -41,4 +41,13 @@
     <string name="error_message">Error loading note</string>
     <string name="nothing_to_save">There is nothing to save</string>
     <string name="notes_search">Search Note</string>
+    <string name="menu_export">Export</string>
+    <string name="export_ok">OK</string>
+    <string name="font_size">Set Font Size</string>
+    <string name="font_s">S</string>
+    <string name="font_m">M</string>
+    <string name="font_l">L</string>
+    <string name="font_color">Set Font Color</string>
+    <string name="font_red">Red</string>
+    <string name="font_black">Black</string>
 </resources>
